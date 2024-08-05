@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://bamf5d0642ugx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_46h1l"]
+content_margin_left = 5.0
+content_margin_right = 5.0
+bg_color = Color(0.439216, 0.729412, 0.980392, 0)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="Entry" type="PanelContainer"]
+theme_override_styles/panel = SubResource("StyleBoxFlat_46h1l")
+
+[node name="HBox" type="HBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1

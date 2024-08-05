@@ -10,45 +10,22 @@ const DATABASE_NAME_SETTING_PATH = "addons/resources_static_database/database_na
 
 var dock
 
-var cur_folder
-var cur_db_name
-var old_db_name
+var old_db_name = ""
 
 var holders : Array
 
-var in_queue : bool
-var queue_time = 1.5
-var queue_timer : Timer
-
 func _enter_tree():
-	cur_folder = ""
-	cur_db_name = "Data"
+	ProjectSettings.set_setting(ROOT_FOLDER_SETTING_PATH, "res://test/resources")
+	ProjectSettings.set_as_internal(ROOT_FOLDER_SETTING_PATH, true)
 
-	dock = preload("res://addons/resources_static_database/resdb_dock.tscn").instantiate()
+	ProjectSettings.set_setting(DATABASE_NAME_SETTING_PATH, "Data")
+	ProjectSettings.set_as_internal(DATABASE_NAME_SETTING_PATH, true)
+
+	dock = preload("res://addons/resources_static_database/scenes/resdb_dock.tscn").instantiate() as ResDbDock
+	dock.generate_button.pressed.connect(build_database)
 	add_control_to_dock(DOCK_SLOT_LEFT_BR, dock)
 
-	ProjectSettings.set_setting(ROOT_FOLDER_SETTING_PATH, cur_folder)
-	ProjectSettings.set_as_internal(ROOT_FOLDER_SETTING_PATH, true)
-	ProjectSettings.set_initial_value(ROOT_FOLDER_SETTING_PATH, cur_folder)
-
-	var property_info = {
-		"name": ROOT_FOLDER_SETTING_PATH,
-		"type": TYPE_STRING,
-		"hint": PROPERTY_HINT_DIR,
-	}
-
-	ProjectSettings.add_property_info(property_info)
-
-	ProjectSettings.set_setting(DATABASE_NAME_SETTING_PATH, cur_db_name)
-	ProjectSettings.set_as_internal(DATABASE_NAME_SETTING_PATH, true)
-	ProjectSettings.set_initial_value(DATABASE_NAME_SETTING_PATH, cur_db_name)
-
 	# ProjectSettings.settings_changed.connect(on_project_settings_changed)
-
-	queue_timer = Timer.new()
-	queue_timer.autostart = false
-	queue_timer.one_shot = true
-	add_child(queue_timer)
 
 func _exit_tree():
 	remove_control_from_docks(dock)
@@ -57,32 +34,12 @@ func _exit_tree():
 	ProjectSettings.set_setting(ROOT_FOLDER_SETTING_PATH, null)
 	ProjectSettings.set_setting(DATABASE_NAME_SETTING_PATH, null)
 
-
-func on_project_settings_changed():
-	var new_folder = ProjectSettings.get_setting(ROOT_FOLDER_SETTING_PATH)
-	var new_db_name = ProjectSettings.get_setting(DATABASE_NAME_SETTING_PATH)
-
-	# if (new_folder != cur_folder || new_db_name != cur_db_name):
-	# 	queue_build_database(new_folder, new_db_name)
-
-
-func queue_build_database(new_folder : String, new_db_name : String):
-	queue_timer.start(queue_time)
-	if (in_queue):
-		return
-
-	in_queue = true
-	await queue_timer.timeout
-	in_queue = false
-
-	cur_folder = new_folder
-	old_db_name = cur_db_name
-	cur_db_name = new_db_name
-
-	build_database()
-
 func build_database():
-	remove_autoload_singleton(old_db_name)
+	var folder = ProjectSettings.get_setting(ROOT_FOLDER_SETTING_PATH)
+	var db_name = ProjectSettings.get_setting(DATABASE_NAME_SETTING_PATH)
+
+	if (old_db_name != ""):
+		remove_autoload_singleton(old_db_name)
 
 	clear_database()
 
@@ -90,10 +47,10 @@ func build_database():
 	while (get_editor_interface().get_resource_filesystem().is_scanning()):
 		continue
 
-	if (cur_db_name == ""):
+	if (db_name == ""):
 		return;
 
-	if (!scan_dir(cur_db_name, cur_folder)):
+	if (!scan_dir(db_name, folder)):
 		return
 
 	for holder in holders:
@@ -106,9 +63,11 @@ func build_database():
 	while (get_editor_interface().get_resource_filesystem().is_scanning()):
 		continue
 
-	var autoload_path = GEN_FOLDER_PATH + "/" + cur_db_name.to_lower() + "tree.gd"
-	print("Add autoload %s at path %s" % [cur_db_name, autoload_path])
-	add_autoload_singleton(cur_db_name, autoload_path)
+	var autoload_path = GEN_FOLDER_PATH + "/" + db_name.to_lower() + "tree.gd"
+	print("Add autoload %s at path %s" % [db_name, autoload_path])
+	add_autoload_singleton(db_name, autoload_path)
+
+	old_db_name = db_name
 
 
 func clear_database():

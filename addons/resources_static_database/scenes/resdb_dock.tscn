@@ -1,0 +1,92 @@
+[gd_scene load_steps=5 format=3 uid="uid://bnfyfr5i1s446"]
+
+[ext_resource type="PackedScene" uid="uid://bamf5d0642ugx" path="res://addons/resources_static_database/scenes/dock_entry.tscn" id="1_dg2qr"]
+[ext_resource type="Script" path="res://addons/resources_static_database/scenes/resdb_dock.gd" id="1_sncw1"]
+[ext_resource type="Texture2D" uid="uid://dcawhddbb3is4" path="res://addons/resources_static_database/Folder.svg" id="2_f2jdg"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_oiog1"]
+
+[node name="ResDB" type="Control" node_paths=PackedStringArray("root_folder_line_edit", "root_folder_button", "db_name_line_edit", "generate_button")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_sncw1")
+root_folder_line_edit = NodePath("Panel/Scroll/List/Entry1/HBox/HBoxContainer/LineEdit")
+root_folder_button = NodePath("Panel/Scroll/List/Entry1/HBox/HBoxContainer/Button")
+db_name_line_edit = NodePath("Panel/Scroll/List/Entry2/HBox/LineEdit")
+generate_button = NodePath("Panel/Scroll/List/Button")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_oiog1")
+
+[node name="Scroll" type="ScrollContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="List" type="VBoxContainer" parent="Panel/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Entry1" parent="Panel/Scroll/List" instance=ExtResource("1_dg2qr")]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/Scroll/List/Entry1/HBox" index="0"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_type_variation = &"TooltipLabel"
+text = "Root Folder"
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/Scroll/List/Entry1/HBox" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LineEdit" type="LineEdit" parent="Panel/Scroll/List/Entry1/HBox/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Button" type="Button" parent="Panel/Scroll/List/Entry1/HBox/HBoxContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+icon = ExtResource("2_f2jdg")
+icon_alignment = 1
+
+[node name="Entry2" parent="Panel/Scroll/List" instance=ExtResource("1_dg2qr")]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/Scroll/List/Entry2/HBox" index="0"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_type_variation = &"TooltipLabel"
+text = "Database Name"
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="LineEdit" type="LineEdit" parent="Panel/Scroll/List/Entry2/HBox" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Button" type="Button" parent="Panel/Scroll/List"]
+layout_mode = 2
+text = "Generate Static Database"
+
+[editable path="Panel/Scroll/List/Entry1"]
+[editable path="Panel/Scroll/List/Entry2"]

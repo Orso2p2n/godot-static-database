@@ -8,6 +8,11 @@
 
 config_version=5
 
+[addons]
+
+resources_static_database/root_folder="res://test/resources"
+resources_static_database/database_name="Data"
+
 [application]
 
 config/name="godot-static-database"
