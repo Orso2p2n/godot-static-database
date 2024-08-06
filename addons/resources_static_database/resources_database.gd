@@ -46,7 +46,7 @@ func build_database():
 	var db_name = ProjectSettings.get_setting(DATABASE_NAME_SETTING_PATH)
 
 	if (old_db_name != ""):
-		print_rich("Removing old autoload [code]%s[/code]." % [old_db_name])
+		print_rich("Removing old Autoload [code]%s[/code]." % [old_db_name])
 
 	await get_tree().process_frame
 
@@ -61,13 +61,13 @@ func build_database():
 		printerr("Database Name is empty.")
 		return;
 
-	print("")
 	if (!scan_dir(db_name, folder)):
 		return
-	print("")
-
+	
 	for holder in holders:
-		var gen_file_path = GEN_FOLDER_PATH + "/" + holder.name_class.to_lower() + ".gd"
+		var file_name = holder.name_class.to_lower() + ".gd"
+		print_rich("[color=light_green]Creating file [code]%s[/code] of class [code]%s[/code]." % [file_name, holder.name_class])
+		var gen_file_path = GEN_FOLDER_PATH + "/" + file_name
 		var file = FileAccess.open(gen_file_path, FileAccess.WRITE)
 		var text = holder.get_final_text()
 		file.store_string(text)
@@ -75,7 +75,7 @@ func build_database():
 	force_scan()
 
 	var autoload_path = GEN_FOLDER_PATH + "/" + db_name.to_lower() + "tree.gd"
-	print_rich("Adding autoload [code]%s[/code] with path [code]%s[/code]." % [db_name, autoload_path])
+	print_rich("Adding Autoload [code]%s[/code] with path [code]%s[/code]." % [db_name, autoload_path])
 
 	await get_tree().process_frame
 
@@ -126,15 +126,21 @@ func scan_dir(dir_name : String, dir_path : String, parent_dir_name = "", depth 
 		elif (ResourceLoader.exists(next_path)):
 			var res = ResourceLoader.load(next_path)
 			var split = next.split(".")
-			var name = split[0]
+			var name = split[0].to_snake_case()
 			var extension = split[1]
+
 			var type = res.get_class()
+			var script = res.get_script()
+			if (script != null):
+				var global_name = script.get_global_name()
+				if (global_name != ""):
+					type = global_name
 
 			if (!check_type(type)):
 				next = dir.get_next()
 				continue
 
-			print_rich("[indent]%s[color=light_cyan]- Found resource [code]%s.%s[/code], of type [code]%s[/code]." % [indent_text, name, extension, type])
+			print_rich("[indent]%s[color=light_cyan]- Found resource [code]%s.%s[/code], of type [code]%s[/code], script %s." % [indent_text, name, extension, type, script])
 			create_entry(name, extension, type, next_path, dir_name)
 
 		next = dir.get_next()
@@ -155,7 +161,7 @@ func create_holder(name : String, in_holder = ""):
 	var parent_holder = get_holder(in_holder)
 	var is_root = parent_holder == null
 	if (!is_root):
-		name_class = parent_holder.name_class + "_" + name
+		name_class = parent_holder.name_class + "_" + name.to_pascal_case()
 	else:
 		name_class = name + "Tree"
 

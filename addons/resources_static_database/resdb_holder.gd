@@ -37,6 +37,6 @@ func get_final_text() -> String:
         text += "var %s : %s = %s.new()\n" % [holder.name, holder.name_class, holder.name_class]
 
     for entry in entries:
-        text += "var %s : %s = load(\"%s\")\n" % [entry.name, entry.type, entry.path]
+        text += "var %s : %s = preload(\"%s\")\n" % [entry.name, entry.type, entry.path]
 
     return text
