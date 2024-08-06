@@ -163,7 +163,7 @@ func scan_dir(dir_name : String, dir_path : String, parent_dir_name = "", depth 
 				next = dir.get_next()
 				continue
 
-			print_rich("[indent]%s[color=light_cyan]- Found resource [code]%s.%s[/code], of type [code]%s[/code], script %s." % [indent_text, name, extension, type, script])
+			print_rich("[indent]%s[color=light_cyan]- Found resource [code]%s.%s[/code], of type [code]%s[/code]." % [indent_text, name, extension, type])
 			
 			# Create entry for the resource
 			create_entry(name, extension, type, next_path, dir_name)
@@ -220,8 +220,4 @@ func get_holder(name : String) -> ResDbHolder:
 	if (root_holder.name == name):
 		return root_holder
 
-	for holder in root_holder.sub_holders:
-		if (holder.name == name):
-			return holder
-	
-	return null
+	return root_holder.get_sub_holder(name)
