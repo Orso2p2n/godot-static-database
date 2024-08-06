@@ -57,9 +57,6 @@ func build_database():
 	print_rich("Clearing old generated database.")
 	clear_database()
 
-	# Force godot scan of files
-	force_scan()
-
 	if (db_name == ""):
 		printerr("Database Name is empty.")
 		return;
@@ -75,6 +72,7 @@ func build_database():
 	var file = FileAccess.open(gen_file_path, FileAccess.WRITE)
 	var text = root_holder.get_final_text()
 	file.store_string(text)
+	file.close()
 
 	# Force godot scan of files
 	force_scan()
