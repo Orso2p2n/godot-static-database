@@ -28,30 +28,43 @@ func _enter_tree():
 	# ProjectSettings.settings_changed.connect(on_project_settings_changed)
 
 func _exit_tree():
+	remove_old_autoload()
 	remove_control_from_docks(dock)
 	dock.free()
 
 	ProjectSettings.set_setting(ROOT_FOLDER_SETTING_PATH, null)
 	ProjectSettings.set_setting(DATABASE_NAME_SETTING_PATH, null)
 
+func remove_old_autoload(print = false):
+	if (old_db_name != ""):
+		remove_autoload_singleton(old_db_name)
+
 func build_database():
+	print_rich("---\n[b]Generating Static Database...\n")
+
 	var folder = ProjectSettings.get_setting(ROOT_FOLDER_SETTING_PATH)
 	var db_name = ProjectSettings.get_setting(DATABASE_NAME_SETTING_PATH)
 
 	if (old_db_name != ""):
-		remove_autoload_singleton(old_db_name)
+		print_rich("Removing old autoload [code]%s[/code]." % [old_db_name])
 
+	await get_tree().process_frame
+
+	remove_old_autoload()
+
+	print_rich("Clearing old generated database.")
 	clear_database()
 
-	get_editor_interface().get_resource_filesystem().scan()
-	while (get_editor_interface().get_resource_filesystem().is_scanning()):
-		continue
+	force_scan()
 
 	if (db_name == ""):
+		printerr("Database Name is empty.")
 		return;
 
+	print("")
 	if (!scan_dir(db_name, folder)):
 		return
+	print("")
 
 	for holder in holders:
 		var gen_file_path = GEN_FOLDER_PATH + "/" + holder.name_class.to_lower() + ".gd"
@@ -59,16 +72,24 @@ func build_database():
 		var text = holder.get_final_text()
 		file.store_string(text)
 
-	get_editor_interface().get_resource_filesystem().scan()
-	while (get_editor_interface().get_resource_filesystem().is_scanning()):
-		continue
+	force_scan()
 
 	var autoload_path = GEN_FOLDER_PATH + "/" + db_name.to_lower() + "tree.gd"
-	print("Add autoload %s at path %s" % [db_name, autoload_path])
+	print_rich("Adding autoload [code]%s[/code] with path [code]%s[/code]." % [db_name, autoload_path])
+
+	await get_tree().process_frame
+
 	add_autoload_singleton(db_name, autoload_path)
+
+	print_rich("\n[color=light_green][b]Static Database generated![/b][/color]\n---")
 
 	old_db_name = db_name
 
+
+func force_scan():
+	get_editor_interface().get_resource_filesystem().scan()
+	while (get_editor_interface().get_resource_filesystem().is_scanning()):
+		continue
 
 func clear_database():
 	holders = []
@@ -78,15 +99,19 @@ func clear_database():
 			dir.remove(file)
 
 
-func scan_dir(dir_name : String, dir_path : String, parent_dir_name = "") -> bool:
+func scan_dir(dir_name : String, dir_path : String, parent_dir_name = "", depth = 0) -> bool:
 	if (dir_path.contains(".godot")):
 		return false
 
-	print("Scanning folder %s" % [dir_path])
+	var indent_text = ""
+	for i in depth:
+		indent_text += "[indent]"
+
+	print_rich("%s[color=sky_blue]- Scanning folder [code]%s[/code]..." % [indent_text, dir_path])
 	var dir = DirAccess.open(dir_path)
 	var error = DirAccess.get_open_error()
 	if (error != OK):
-		printerr("Could not scan folder %s. Error: %s" % [dir_path, error])
+		printerr("%s- Could not scan folder %s. Error: %s." % [indent_text, dir_path, error])
 		return false
 
 	create_holder(dir_name, parent_dir_name)
@@ -97,7 +122,7 @@ func scan_dir(dir_name : String, dir_path : String, parent_dir_name = "") -> boo
 		var next_path = dir_path + "/" + next
 
 		if (dir.dir_exists(next)):
-			scan_dir(next, next_path, dir_name)
+			scan_dir(next, next_path, dir_name, depth + 1)
 		elif (ResourceLoader.exists(next_path)):
 			var res = ResourceLoader.load(next_path)
 			var split = next.split(".")
@@ -109,6 +134,7 @@ func scan_dir(dir_name : String, dir_path : String, parent_dir_name = "") -> boo
 				next = dir.get_next()
 				continue
 
+			print_rich("[indent]%s[color=light_cyan]- Found resource [code]%s.%s[/code], of type [code]%s[/code]." % [indent_text, name, extension, type])
 			create_entry(name, extension, type, next_path, dir_name)
 
 		next = dir.get_next()
