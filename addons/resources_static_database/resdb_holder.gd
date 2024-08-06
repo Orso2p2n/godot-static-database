@@ -10,12 +10,11 @@ var name_class : String
 
 var is_root = false
 
-func add_entry(entry_name : String, entry_extension : String, entry_type : String, entry_path : String, uncertain_csharp_type : bool):
+func add_entry(entry_name : String, entry_extension : String, entry_type : String, entry_path : String):
     var new_entry = ResDbEntry.new()
     new_entry.name = entry_name
     new_entry.extension = entry_extension
     new_entry.type = entry_type
-    new_entry.uncertain_csharp_type = uncertain_csharp_type
     new_entry.path = entry_path
 
     for entry in entries:

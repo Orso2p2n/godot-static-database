@@ -153,7 +153,6 @@ func scan_dir(dir_name : String, dir_path : String, parent_dir_name = "", depth 
 
 			var type = res.get_class()
 			var script = res.get_script()
-			var uncertain_csharp_type = false
 			if (script != null):
 				var global_name = script.get_global_name()
 				if (global_name != ""):
@@ -167,7 +166,7 @@ func scan_dir(dir_name : String, dir_path : String, parent_dir_name = "", depth 
 			print_rich("[indent]%s[color=light_cyan]- Found resource [code]%s.%s[/code], of type [code]%s[/code], script %s." % [indent_text, name, extension, type, script])
 			
 			# Create entry for the resource
-			create_entry(name, extension, type, next_path, dir_name, uncertain_csharp_type)
+			create_entry(name, extension, type, next_path, dir_name)
 
 		next = dir.get_next()
 
@@ -203,12 +202,12 @@ func create_holder(name : String, in_holder = ""):
 		root_holder = holder
 
 
-func create_entry(entry_name : String, entry_extension : String, entry_type : String, entry_path : String, in_holder : String, uncertain_csharp_type : bool):
+func create_entry(entry_name : String, entry_extension : String, entry_type : String, entry_path : String, in_holder : String):
 	var holder = get_holder(in_holder)
 	if (holder == null):
 		return
 	
-	holder.add_entry(entry_name, entry_extension, entry_type, entry_path, uncertain_csharp_type)
+	holder.add_entry(entry_name, entry_extension, entry_type, entry_path)
 
 
 func get_holder(name : String) -> ResDbHolder:
