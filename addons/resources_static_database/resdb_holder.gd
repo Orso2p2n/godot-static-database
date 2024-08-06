@@ -51,11 +51,9 @@ func get_final_text() -> String:
         text += "\textends RefCounted\n\n"
         prefix = "\t"
 
-    print(name_class + " sub_holders" + str(sub_holders.size()))
     for holder in sub_holders:
         text += prefix + "var %s : %s = %s.new()\n" % [holder.name, holder.name_class, holder.name_class]
 
-    print(name_class + " entries " + str(entries.size()))
     for entry in entries:
         text += prefix + "var %s : %s = preload(\"%s\")\n" % [entry.name, entry.type, entry.path]
 
