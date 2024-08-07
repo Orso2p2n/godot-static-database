@@ -23,7 +23,7 @@ func _enter_tree():
 	ProjectSettings.set_as_internal(DATABASE_NAME_SETTING_PATH, true)
 
 	# Instantiate dock
-	dock = preload("res://addons/resources_static_database/scenes/resdb_dock.tscn").instantiate() as ResDbDock
+	dock = preload("res://addons/resources_static_database/scenes/resdb_dock.tscn").instantiate()
 	dock.generate_button.pressed.connect(build_database)
 	add_control_to_dock(DOCK_SLOT_LEFT_BR, dock)
 

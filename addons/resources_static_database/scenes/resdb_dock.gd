@@ -1,8 +1,6 @@
 @tool
 extends Control
 
-class_name ResDbDock
-
 @export var root_folder_line_edit : LineEdit
 @export var root_folder_button : Button
 @export var db_name_line_edit : LineEdit
