@@ -44,8 +44,7 @@ func get_final_text() -> String:
     var prefix = ""
 
     if (is_root):
-        text += prefix + "extends Node\n\n"
-        text += "class_name %s\n\n" % [name_class]
+        text += "extends Node\n\n"
     else:
         text +="class %s:\n"  % [name_class]
         text += "\textends RefCounted\n\n"
