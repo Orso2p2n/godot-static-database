@@ -20,6 +20,9 @@ func _enter_tree():
 
 	root_folder_button.pressed.connect(_on_root_folder_button_pressed)
 
+	root_folder_line_edit.text_changed.connect(_on_root_folder_line_edit_text_changed)
+	db_name_line_edit.text_changed.connect(_on_db_name_line_edit_text_changed)
+
 	file_dialog = EditorFileDialog.new()
 	file_dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_DIR
 	file_dialog.access = EditorFileDialog.ACCESS_RESOURCES
@@ -36,6 +39,12 @@ func _on_root_folder_button_pressed():
 
 func _on_dir_selected(dir):
 	set_root_folder(dir)
+
+func _on_root_folder_line_edit_text_changed(new_text : String):
+	set_root_folder(new_text)
+
+func _on_db_name_line_edit_text_changed(new_text : String):
+	set_db_name(new_text)
 
 func set_root_folder(path : String):
 	if root_folder_line_edit.text != path:
