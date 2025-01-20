@@ -20,11 +20,13 @@ var root_holder : ResDbHolder
 
 func _enter_tree():
 	# Set project settings for database
-	ProjectSettings.set_setting(ROOT_FOLDER_SETTING_PATH, "res://test/resources")
-	ProjectSettings.set_as_internal(ROOT_FOLDER_SETTING_PATH, true)
+	if (!ProjectSettings.has_setting(ROOT_FOLDER_SETTING_PATH)):
+		ProjectSettings.set_setting(ROOT_FOLDER_SETTING_PATH, "")
+		ProjectSettings.set_as_internal(ROOT_FOLDER_SETTING_PATH, true)
 
-	ProjectSettings.set_setting(DATABASE_NAME_SETTING_PATH, "Data")
-	ProjectSettings.set_as_internal(DATABASE_NAME_SETTING_PATH, true)
+	if (!ProjectSettings.has_setting(DATABASE_NAME_SETTING_PATH)):
+		ProjectSettings.set_setting(DATABASE_NAME_SETTING_PATH, "Data")
+		ProjectSettings.set_as_internal(DATABASE_NAME_SETTING_PATH, true)
 
 	# Instantiate dock
 	dock = preload("res://addons/resources_static_database/scenes/resdb_dock.tscn").instantiate()
@@ -51,6 +53,11 @@ func build_database():
 
 	var folder = ProjectSettings.get_setting(ROOT_FOLDER_SETTING_PATH)
 	var db_name = ProjectSettings.get_setting(DATABASE_NAME_SETTING_PATH)
+
+	# Create folder
+	if (!DirAccess.dir_exists_absolute(GEN_FOLDER_PATH)):
+		print_rich("Creating [code]gen[/code] folder.")
+		DirAccess.make_dir_recursive_absolute((GEN_FOLDER_PATH))
 
 	if (old_db_name != ""):
 		print_rich("Removing old Autoload [code]%s[/code]." % [old_db_name])

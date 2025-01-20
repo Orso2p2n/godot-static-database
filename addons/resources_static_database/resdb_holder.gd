@@ -49,7 +49,7 @@ func get_final_text_gd() -> String:
     if (is_root):
         text += "extends Node\n\n"
     else:
-        text +="class %s:\n"  % [name_class_cs]
+        text +="class %s:\n"  % [name_class_gd]
         text += "\textends RefCounted\n\n"
         prefix = "\t"
 

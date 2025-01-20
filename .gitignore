@@ -2,3 +2,4 @@
 .godot/
 
 test/
+addons/resources_static_database/gen/*
