@@ -4,6 +4,7 @@ extends Control
 @export var root_folder_line_edit : LineEdit
 @export var root_folder_button : Button
 @export var db_name_line_edit : LineEdit
+@export var language_option_button : OptionButton
 @export var generate_button : Button
 
 var cur_root_folder : String

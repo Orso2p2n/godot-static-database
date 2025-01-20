@@ -11,6 +11,10 @@ const DATABASE_NAME_SETTING_PATH = "addons/resources_static_database/database_na
 var dock
 
 var old_db_name = ""
+var autoload_added = false
+
+var generate_gdscript = true
+var generate_csharp = false
 
 var root_holder : ResDbHolder
 
@@ -25,6 +29,7 @@ func _enter_tree():
 	# Instantiate dock
 	dock = preload("res://addons/resources_static_database/scenes/resdb_dock.tscn").instantiate()
 	dock.generate_button.pressed.connect(build_database)
+	dock.language_option_button.item_selected.connect(language_selected)
 	add_control_to_dock(DOCK_SLOT_LEFT_BR, dock)
 
 func _exit_tree():
@@ -37,8 +42,9 @@ func _exit_tree():
 	ProjectSettings.set_setting(DATABASE_NAME_SETTING_PATH, null)
 
 func remove_old_autoload(print = false):
-	if (old_db_name != ""):
+	if (old_db_name != "" && autoload_added):
 		remove_autoload_singleton(old_db_name)
+		autoload_added = false;
 
 func build_database():
 	print_rich("---\n[b]Generating Static Database...\n")
@@ -65,25 +71,38 @@ func build_database():
 	if (!scan_dir(db_name, folder)):
 		return
 	
-	# Write the main file
-	var file_name = root_holder.name_class.to_lower() + ".gd"
-	print_rich("[color=light_green]Creating file [code]%s[/code] of class [code]%s[/code]." % [file_name, root_holder.name_class])
-	var gen_file_path = GEN_FOLDER_PATH + "/" + file_name
-	var file = FileAccess.open(gen_file_path, FileAccess.WRITE)
-	var text = root_holder.get_final_text()
-	file.store_string(text)
-	file.close()
+	# Write the main files
+
+	# GDScript
+	var gdscript_file_name = ""
+	if (generate_gdscript):
+		gdscript_file_name = root_holder.name_class_gd.to_lower() + ".gd"
+		print_rich("[color=light_green]Creating file [code]%s[/code] of class [code]%s[/code]." % [gdscript_file_name, root_holder.name_class_gd])
+		var gen_file_path = GEN_FOLDER_PATH + "/" + gdscript_file_name
+		var file = FileAccess.open(gen_file_path, FileAccess.WRITE)
+		var text = root_holder.get_final_text_gd()
+		file.store_string(text)
+		file.close()
+
+	# C#
+	if (generate_csharp):
+		var file_name = root_holder.name_class_cs.to_pascal_case() + ".cs"
+		print_rich("[color=light_green]Creating file [code]%s[/code] of class [code]%s[/code]." % [file_name, root_holder.name_class_cs])
+		var gen_file_path = GEN_FOLDER_PATH + "/" + file_name
+		var file = FileAccess.open(gen_file_path, FileAccess.WRITE)
+		var text = root_holder.get_final_text_cs()
+		file.store_string(text)
+		file.close()
 
 	# Force godot scan of files
 	force_scan()
 
 	# Add autoload
-	var autoload_path = GEN_FOLDER_PATH + "/" + file_name
-	print_rich("Adding Autoload [code]%s[/code] with path [code]%s[/code]." % [db_name, autoload_path])
-
-	await get_tree().process_frame
-
-	add_autoload_singleton(db_name, autoload_path)
+	if (generate_gdscript):
+		var autoload_path = GEN_FOLDER_PATH + "/" + gdscript_file_name
+		print_rich("Adding Autoload [code]%s[/code] with path [code]%s[/code]." % [db_name, autoload_path])
+		await get_tree().process_frame
+		add_autoload_singleton(db_name, autoload_path)
 
 	# Done!
 	print_rich("\n[color=light_green][b]Static Database generated![/b][/color]\n---")
@@ -102,7 +121,7 @@ func clear_database():
 	# Delete old generated files
 	var dir = DirAccess.open(GEN_FOLDER_PATH)
 	for file in dir.get_files():
-		if file.ends_with(".gd"):
+		if file.ends_with(".gd") or file.ends_with(".cs"):
 			dir.remove(file)
 
 
@@ -180,18 +199,22 @@ func check_if_type_is_legal(class_str : String) -> bool :
 
 
 func create_holder(name : String, in_holder = ""):
-	var name_class = ""
+	var name_class_gd : String = ""
+	var name_class_cs : String = ""
 	var parent_holder = get_holder(in_holder)
 	var is_root = parent_holder == null
 	if (!is_root):
-		name_class = parent_holder.name_class + "_" + name.to_pascal_case()
+		name_class_gd = parent_holder.name_class_gd + "_" + name.to_pascal_case()
+		name_class_cs = parent_holder.name_class_cs + "_" + name.to_pascal_case()
 	else:
-		name_class = name + "Tree"
+		name_class_gd = name + "Tree"
+		name_class_cs = name;
 
 	var holder = ResDbHolder.new()
 
 	holder.name = name
-	holder.name_class = name_class
+	holder.name_class_gd = name_class_gd
+	holder.name_class_cs = name_class_cs
 	holder.is_root = is_root
 
 	if (!is_root):
@@ -219,3 +242,15 @@ func get_holder(name : String) -> ResDbHolder:
 		return root_holder
 
 	return root_holder.get_sub_holder(name)
+
+func language_selected(index : int):
+	match index:
+		0:
+			generate_gdscript = true
+			generate_csharp = false
+		1:
+			generate_gdscript = false
+			generate_csharp = true
+		2:
+			generate_gdscript = true
+			generate_csharp = true
