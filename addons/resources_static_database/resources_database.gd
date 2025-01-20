@@ -168,22 +168,38 @@ func scan_dir(dir_name : String, dir_path : String, parent_dir_name = "", depth 
 			var name = split[0].to_snake_case()
 			var extension = split[1]
 
-			var type = res.get_class()
+			var type_gd = res.get_class()
+			var type_cs = type_gd
+
+			# Some built-in types are illegal
+			if (!check_if_type_is_legal(type_gd)):
+				next = dir.get_next()
+				continue
+
+			# Get custom type (script)
 			var script = res.get_script()
 			if (script != null):
 				var global_name = script.get_global_name()
 				if (global_name != ""):
-					type = global_name
+					# Set GDScript class
+					if (script is GDScript):
+						type_gd = global_name
+					# Set C# class
+					if (script is CSharpScript):
+						type_cs = global_name
 
-			# Some types are illegal
-			if (!check_if_type_is_legal(type)):
-				next = dir.get_next()
-				continue
-
-			print_rich("[indent]%s[color=light_cyan]- Found resource [code]%s.%s[/code], of type [code]%s[/code]." % [indent_text, name, extension, type])
+			# Print
+			var type_print = ""
+			if (generate_gdscript):
+				type_print = type_gd;
+			if (generate_csharp):
+				type_print = type_cs
+			if (generate_gdscript && generate_csharp):
+				type_print = type_gd + " (GD) / " + type_cs + " (C#)"
+			print_rich("[indent]%s[color=light_cyan]- Found resource [code]%s.%s[/code], of type [code]%s[/code]." % [indent_text, name, extension, type_print])
 			
 			# Create entry for the resource
-			create_entry(name, extension, type, next_path, dir_name)
+			create_entry(name, extension, type_gd, type_cs, next_path, dir_name)
 
 		next = dir.get_next()
 
@@ -223,12 +239,12 @@ func create_holder(name : String, in_holder = ""):
 		root_holder = holder
 
 
-func create_entry(entry_name : String, entry_extension : String, entry_type : String, entry_path : String, in_holder : String):
+func create_entry(entry_name : String, entry_extension : String, entry_type_gd : String, entry_type_cs : String, entry_path : String, in_holder : String):
 	var holder = get_holder(in_holder)
 	if (holder == null):
 		return
 	
-	holder.add_entry(entry_name, entry_extension, entry_type, entry_path)
+	holder.add_entry(entry_name, entry_extension, entry_type_gd, entry_type_cs, entry_path)
 
 
 func get_holder(name : String) -> ResDbHolder:

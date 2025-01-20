@@ -11,11 +11,12 @@ var name_class_cs : String
 
 var is_root = false
 
-func add_entry(entry_name : String, entry_extension : String, entry_type : String, entry_path : String):
+func add_entry(entry_name : String, entry_extension : String, entry_type_gd : String, entry_type_cs : String, entry_path : String):
     var new_entry = ResDbEntry.new()
     new_entry.name = entry_name
     new_entry.extension = entry_extension
-    new_entry.type = entry_type
+    new_entry.type_gd = entry_type_gd
+    new_entry.type_cs = entry_type_cs
     new_entry.path = entry_path
 
     for entry in entries:
@@ -56,7 +57,7 @@ func get_final_text_gd() -> String:
         text += prefix + "var %s : %s = %s.new()\n" % [holder.name, holder.name_class_gd, holder.name_class_gd]
 
     for entry in entries:
-        text += prefix + "var %s : %s = preload(\"%s\")\n" % [entry.name, entry.type, entry.path]
+        text += prefix + "var %s : %s = preload(\"%s\")\n" % [entry.name, entry.type_gd, entry.path]
 
     if (is_root):
         text += get_sub_holders_text_gd()
@@ -88,7 +89,7 @@ func get_final_text_cs() -> String:
         text += "\tpublic %sreadonly %s %s = new();\n" % [keyword, holder.name_class_cs, holder.name.to_pascal_case()]
 
     for entry in entries:
-        text += "\tpublic %sreadonly %s %s = ResourceLoader.Load<%s>(\"%s\");\n" % [keyword, entry.type, entry.name.to_pascal_case(), entry.type, entry.path]
+        text += "\tpublic %sreadonly %s %s = ResourceLoader.Load<%s>(\"%s\");\n" % [keyword, entry.type_cs, entry.name.to_pascal_case(), entry.type_cs, entry.path]
 
     text += "}\n"
 
