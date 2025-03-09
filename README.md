@@ -1,4 +1,4 @@
-# Godot Static Database
+# ResDB - Godot Static Database
 
 **Godot Static Database** is a Godot addon that adds a panel with which you can automatically create a static script that hold references to all the resources in a specified folder.
 
